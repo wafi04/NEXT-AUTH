@@ -28,6 +28,10 @@ This is a comprehensive Next.js authentication starter template featuring multip
 - **Styling**: Tailwind CSS
 - **ORM**: Prisma
 - **Database**: PostgreSQL
+  
+##  env
+- AUTH_SECRET=
+- DATABASE_URL=
 
 ## 🔧 Prerequisites
 
