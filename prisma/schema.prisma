@@ -57,6 +57,10 @@ model User {
   image         String?
   password    String?
   role    Role   @default(USER)
+
+  venues    Venue[]
+  bookings   Booking[]
+
   accounts      Account[]
   sessions      Session[]
  
@@ -70,4 +74,92 @@ model VerificationToken {
  
   @@unique([identifier, token])
   @@map("verification_tokens")
+}
+
+model Venue {
+  id            String    @id @default(cuid())
+  name          String    @unique
+  description   String?
+  address       String
+  city          String
+  province      String
+  capacity      Int
+  price         Float
+  facilities    String[]
+  images        VenueImage[]
+  bookings      Booking[]
+  createdBy     String
+  user          User      @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([name, city, province])
+}
+
+model VenueImage {
+  id        String   @id @default(cuid())
+  url       String
+  venueId   String   @map("venue_id")
+  venue     Venue    @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([venueId])
+}
+
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  REJECTED
+  COMPLETED
+  CANCELLED
+}
+model Booking {
+  id            String        @id @default(cuid())
+  venueId       String        @map("venue_id")
+  venue         Venue         @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  userId        String        @map("user_id")
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  startDate     DateTime
+  endDate       DateTime
+  totalPrice    Float
+  status        BookingStatus @default(PENDING)
+  paymentProof  String?
+  notes         String?
+  addons        BookingAddon[] 
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@index([venueId, userId, startDate])
+  @@unique([venueId, startDate, endDate])
+}
+
+model BookingAddon {
+  id            String    @id @default(cuid())
+  name          String
+  description   String?
+  price         Float
+  bookingId     String    @map("booking_id")
+  booking       Booking   @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  createdAt     DateTime  @default(now())
+
+  @@index([bookingId])
+}
+model AddonService {
+  id            String    @id @default(cuid())
+  name          String    @unique
+  description   String?
+  price         Float
+  category      AddonCategory
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+}
+
+enum AddonCategory {
+  CATERING
+  DECORATION
+  SOUND_SYSTEM
+  PHOTOGRAPHY
+  TRANSPORTATION
+  OTHER
 }

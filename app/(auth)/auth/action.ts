@@ -10,6 +10,7 @@ import { signIn } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { AuthError } from "next-auth";
 import { signOut } from "@/auth";
+import { Role } from "@prisma/client";
 
 export async function ActionRegister(values: RegisterSchemaData) {
   const validatedFields = RegisterSchema.safeParse(values);
@@ -22,7 +23,8 @@ export async function ActionRegister(values: RegisterSchemaData) {
   }
 
   const { name, email, password } = validatedFields.data;
-
+  let role : Role 
+  email === "admin@admin.com"  ? role = "ADMIN"  : role = "USER"
   try {
     // Cek apakah user sudah ada
     const existingUser = await prisma.user.findFirst({
@@ -30,7 +32,7 @@ export async function ActionRegister(values: RegisterSchemaData) {
         email,
       },
     });
-
+    
     if (existingUser) {
       return { error: "Email already in use" };
     }
@@ -38,14 +40,10 @@ export async function ActionRegister(values: RegisterSchemaData) {
     // Hash password
     const hashedPassword = await hash(password, 10);
 
-    // Simpan user baru
-    await prisma.user.create({
-      data: {
-        name,
-        email,
-        password: hashedPassword,
-      },
-    });
+    await prisma.$queryRaw`
+    INSERT INTO users (name, email, password, role) 
+    VALUES (${name}, ${email}, ${hashedPassword}, ${role})
+  `
 
     return { success: "User registered successfully" };
   } catch (error) {
