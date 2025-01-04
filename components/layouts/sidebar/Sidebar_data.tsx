@@ -4,7 +4,8 @@ import {
   CalendarCheck,
   Wallet,
   User,
-  Bell
+  Bell,
+  Upload
 } from "lucide-react";
 
 export const menuItems = [
@@ -17,6 +18,11 @@ export const menuItems = [
     icon: Building2,
     label: "Venues",
     path: "/dashboard/venues",
+  },
+  {
+    icon: Upload,
+    label: "Uploads",
+    path: "/dashboard/uploads",
   },
   {
     icon: CalendarCheck,

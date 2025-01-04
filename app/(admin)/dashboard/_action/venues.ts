@@ -3,11 +3,16 @@ import { VenueDto, VenueSchema } from "@/validation/venues"
 import { Venue } from "@prisma/client"
 import { prisma } from "@/lib/prisma" 
 import { currentUser } from "@/features/auth/data"
+import { VenueWithImage } from "@/types/venues"
+
 export interface VenueResponse {
   data?: Venue
   error?: string | null
 }
-
+export interface VenueWithImageResponse {
+  data?: VenueWithImage[]
+  error?: string | null
+}
 export async function ActionCreateVenue(datas: VenueDto): Promise<VenueResponse> {
   try {
     const user =  await currentUser()
@@ -93,5 +98,40 @@ export async function DeleteVenue(id : string) : Promise<string>{
     }
     return "Failed to create venue"
   
+  }
+}
+
+
+
+export async function ActionGetVenueWithImage(): Promise<{
+  data?: VenueWithImage[];
+  error?: string;
+}> {
+  try {
+    const data = await prisma.$queryRaw`
+      SELECT 
+        v.id, 
+        v.name, 
+        v.description,
+        V.price,
+        JSON_AGG(vi.url) AS image_urls
+      FROM "Venue" v
+      LEFT JOIN "VenueImage" vi ON v.id = vi.venue_id
+      GROUP BY v.id, v.name 
+    `;
+
+    
+    return {
+      data: data as VenueWithImage[]
+    };
+  } catch (error) {
+    if (error instanceof Error) {
+      return {
+        error: error.message || "Something Went Wrong"
+      };
+    }
+    return {
+      error: "Failed to fetch venues"
+    };
   }
 }

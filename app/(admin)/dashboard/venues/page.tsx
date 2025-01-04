@@ -6,7 +6,6 @@ import { CardVenues } from "@/features/venues/components/CardVenues";
 
 export default async  function Page(){
     const data  = await ActionGetVenue()
-    console.log(data)
     return (
         <>
             <HeaderDashboard  title="Venues"  subTitle="Manage your Venues">

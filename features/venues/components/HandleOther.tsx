@@ -12,12 +12,13 @@ import { useRouter } from "next/navigation"
 
 export function HandleOther({venue}  : {venue : Venue}){
     const [openUpdate,setOpenUpdate]  = useState<boolean>(false)
+    
     const {refresh}  = useRouter()
     return (
         <>
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button size={"icon"} className="bg-gray-200 hover:bg-gray-300 rounded-full px-2 py-0 z-10">
+                <Button size={"icon"} className="bg-gray-200 absolute top-3 right-3 hover:bg-gray-300 rounded-full px-2 py-0 z-10">
                     <Ellipsis className=" text-gray-900"/>
                 </Button>
             </DropdownMenuTrigger>
