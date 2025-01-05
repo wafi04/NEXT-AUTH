@@ -21,8 +21,8 @@ export const menuItems = [
   },
   {
     icon: Upload,
-    label: "Uploads",
-    path: "/dashboard/uploads",
+    label: "images",
+    path: "/dashboard/images",
   },
   {
     icon: CalendarCheck,

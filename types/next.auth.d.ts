@@ -12,3 +12,10 @@ declare module "next-auth" {
     user: ExtendedUser;
   }
 }
+
+export interface PaginationInfo {
+  currentPage: number;
+  totalPages: number;
+  totalItems: number;
+  hasNextPage: boolean;
+}

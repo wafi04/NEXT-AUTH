@@ -1,107 +1,102 @@
-"use server"    
-import { VenueDto, VenueSchema } from "@/validation/venues"
-import { Venue } from "@prisma/client"
-import { prisma } from "@/lib/prisma" 
-import { currentUser } from "@/features/auth/data"
-import { VenueWithImage } from "@/types/venues"
+"use server";
+import { VenueDto, VenueSchema } from "@/validation/venues";
+import { Venue } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
+import { currentUser } from "@/features/auth/data";
+import { VenueWithImage } from "@/types/venues";
 
 export interface VenueResponse {
-  data?: Venue
-  error?: string | null
+  data?: Venue;
+  error?: string | null;
 }
 export interface VenueWithImageResponse {
-  data?: VenueWithImage[]
-  error?: string | null
+  data?: VenueWithImage[];
+  error?: string | null;
 }
-export async function ActionCreateVenue(datas: VenueDto): Promise<VenueResponse> {
+export async function ActionCreateVenue(
+  datas: VenueDto
+): Promise<VenueResponse> {
   try {
-    const user =  await currentUser()
-    console.log(datas)
+    const user = await currentUser();
+    console.log(datas);
 
     const venue = await prisma.venue.create({
       data: {
         ...datas,
-        createdBy : user?.id as string
-      }
-    })
+        createdBy: user?.id as string,
+      },
+    });
 
     return {
       data: venue,
-      error: null
-    }
-
+      error: null,
+    };
   } catch (error) {
     if (error instanceof Error) {
       return {
-        error: error.message  || "Something Went Wrong"
-      }
+        error: error.message || "Something Went Wrong",
+      };
     }
     return {
-      error: "Failed to create venue"
-    }
+      error: "Failed to create venue",
+    };
   }
 }
 
-
-export async function  ActionGetVenue(){
-  return await  prisma.venue.findMany({})
+export async function ActionGetVenue() {
+  return await prisma.venue.findMany({});
 }
 
-
-export async function  ActionUpdateVenue(data : VenueDto,id  : string) : Promise<VenueResponse>{
+export async function ActionUpdateVenue(
+  data: VenueDto,
+  id: string
+): Promise<VenueResponse> {
   try {
-    const user =  await currentUser()
+    const user = await currentUser();
 
-    if(!user){
+    if (!user) {
       return {
-        error : "UNAUTHORIZED"
-      }
+        error: "UNAUTHORIZED",
+      };
     }
-    console.log(data)
+    console.log(data);
 
     const venue = await prisma.venue.update({
-      where : {id},
+      where: { id },
       data: {
         ...data,
-      }
-    })
+      },
+    });
 
     return {
       data: venue,
-      error: null
-    }
-
+      error: null,
+    };
   } catch (error) {
     if (error instanceof Error) {
       return {
-        error: error.message  || "Something Went Wrong"
-      }
+        error: error.message || "Something Went Wrong",
+      };
     }
     return {
-      error: "Failed to create venue"
-    }
+      error: "Failed to create venue",
+    };
   }
 }
 
-
-
-export async function DeleteVenue(id : string) : Promise<string>{
+export async function DeleteVenue(id: string): Promise<string> {
   try {
-    
     await prisma.venue.delete({
-      where : {id}
-    })
-    return "Succesfully deleted venue"
+      where: { id },
+    });
+    return "Succesfully deleted venue";
   } catch (error) {
     if (error instanceof Error) {
-      return "Something Went Wrong"
+      return "Something Went Wrong";
     }
-    return "Failed to create venue"
-  
+    return "Failed to create venue";
   }
 }
-
-
 
 export async function ActionGetVenueWithImage(): Promise<{
   data?: VenueWithImage[];
@@ -120,18 +115,60 @@ export async function ActionGetVenueWithImage(): Promise<{
       GROUP BY v.id, v.name 
     `;
 
-    
     return {
-      data: data as VenueWithImage[]
+      data: data as VenueWithImage[],
     };
   } catch (error) {
     if (error instanceof Error) {
       return {
-        error: error.message || "Something Went Wrong"
+        error: error.message || "Something Went Wrong",
       };
     }
     return {
-      error: "Failed to fetch venues"
+      error: "Failed to fetch venues",
+    };
+  }
+}
+
+export async function ActionGetVenueById(id: string): Promise<{
+  data?: VenueWithImage;
+  error?: string;
+}> {
+  try {
+    const venue = await prisma.venue.findUnique({
+      where: { id },
+      include: {
+        images: {
+          select: {
+            url: true,
+          },
+        },
+      },
+    });
+
+    if (!venue) {
+      return {
+        error: "Venue not found",
+      };
+    }
+
+    const venueWithImage: VenueWithImage = {
+      ...venue,
+      image_urls: venue.images.map((img) => img.url),
+    };
+
+    return {
+      data: venueWithImage,
+    };
+  } catch (error) {
+    console.error("Error fetching venue:", error);
+    if (error instanceof Error) {
+      return {
+        error: error.message || "Something went wrong",
+      };
+    }
+    return {
+      error: "Failed to fetch venue",
     };
   }
 }
